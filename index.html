@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ポケモン図鑑</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/modern-css-reset/dist/reset.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <style></style>
+  </head>
+  <body>
+    <header class="pokemon-header">
+      <div class="inner">
+        <h1 class="pokemon-title">ポケモン図鑑</h1>
+      </div>
+    </header>
+    <main>
+      <div class="content">
+        <div class="inner">
+          <div class="d-pokemon-down">
+            <label for="sort-select">並び順: </label>
+            <select id="sort-select">
+              <option value="number-asc">ナンバー順 (早いやつ)</option>
+              <option value="number-desc">ナンバー順 (遅いやつ)</option>
+              <option value="name-asc">名前順 (A~)</option>
+              <option value="name-desc">名前順 (Z~)</option>
+            </select>
+          </div>
+          <div id="pokedex-container"></div>
+        </div>
+      </div>
+    </main>
+    <footer class="footer"></footer>
+
+    <script>
+      async function getPokemonData(url) {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+      }
+
+      function displayPokemonData(pokemonData, pokedexContainer) {
+        const pokemonElement = document.createElement("div");
+        pokemonElement.className = "pokemon";
+
+        const pokemonImageElement = document.createElement("div");
+        pokemonImageElement.className = "pokemon-imgframe";
+        const pokemonImage = document.createElement("img");
+        pokemonImage.className = "pokemon-image";
+        pokemonImage.src = pokemonData.sprites.front_default;
+        pokemonImage.alt = "Pokemon";
+        pokemonImageElement.appendChild(pokemonImage);
+
+        const pokemonIdElement = document.createElement("p");
+        pokemonIdElement.className = "pokemon-id";
+        pokemonIdElement.textContent = `#${pokemonData.id
+          .toString()
+          .padStart(4, "0")}`;
+
+        const pokemonNameElement = document.createElement("h2");
+        pokemonNameElement.className = "pokemon-name";
+        pokemonNameElement.textContent = pokemonData.name;
+
+        const pokemonTypeElement = document.createElement("p");
+        pokemonTypeElement.className = "pokemon-type";
+        pokemonData.types.forEach((typeData) => {
+          const typeElement = createTypeElement(typeData.type.name);
+          pokemonTypeElement.appendChild(typeElement);
+        });
+
+        pokemonElement.appendChild(pokemonImageElement);
+        pokemonElement.appendChild(pokemonIdElement);
+        pokemonElement.appendChild(pokemonNameElement);
+        pokemonElement.appendChild(pokemonTypeElement);
+
+        pokedexContainer.appendChild(pokemonElement);
+
+        pokemonElement.addEventListener("click", () => {
+          window.location.href = `pokemon.html?id=${pokemonData.id}`;
+        });
+      }
+
+      function createTypeElement(type) {
+        const typeElement = document.createElement("span");
+        typeElement.textContent = type;
+        typeElement.classList.add("type", `type-${type}`);
+        return typeElement;
+      }
+
+      async function createPokedex() {
+        const pokedexContainer = document.getElementById("pokedex-container");
+        const sortSelect = document.getElementById("sort-select");
+
+        try {
+          const response = await fetch(
+            "https://pokeapi.co/api/v2/pokemon?limit=151"
+          );
+          const data = await response.json();
+          const pokemonList = data.results;
+
+          sortSelect.addEventListener("change", async () => {
+            pokedexContainer.innerHTML = "";
+
+            const sortValue = sortSelect.value;
+            let sortedPokemonList = [];
+
+            switch (sortValue) {
+              case "number-asc":
+                sortedPokemonList = pokemonList;
+                break;
+              case "number-desc":
+                sortedPokemonList = pokemonList.slice().reverse();
+                break;
+              case "name-asc":
+                sortedPokemonList = pokemonList
+                  .slice()
+                  .sort((a, b) => (a.name > b.name ? 1 : -1));
+                break;
+              case "name-desc":
+                sortedPokemonList = pokemonList
+                  .slice()
+                  .sort((a, b) => (a.name < b.name ? 1 : -1));
+                break;
+            }
+
+            for (const pokemon of sortedPokemonList) {
+              const pokemonData = await getPokemonData(pokemon.url);
+              displayPokemonData(pokemonData, pokedexContainer);
+            }
+          });
+
+          sortSelect.value = "number-asc";
+          sortSelect.dispatchEvent(new Event("change"));
+        } catch (error) {
+          console.log("Error:", error);
+        }
+      }
+
+      window.addEventListener("load", createPokedex);
+    </script>
+  </body>
+</html>

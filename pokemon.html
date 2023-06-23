@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ポケモン図鑑</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/modern-css-reset/dist/reset.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <header class="pokemon-header">
+      <div class="inner">
+        <h1 class="pokemon-title">ポケモン図鑑</h1>
+      </div>
+    </header>
+    <main>
+      <div class="d-pokemon-pan">
+        <div class="d-pokemon-inner">
+          <div class="d-pokemon-panroot">
+            <a href="index.html">TOP</a>
+            <p class="d-pokemon-pantext"></p>
+          </div>
+        </div>
+      </div>
+      <div class="pokemon-pagebtn">
+        <div class="d-pokemon-inner">
+          <div class="d-pokemon-btnbox">
+            <a class="d-pokemon-prev" href=""></a>
+            <a class="d-pokemon-next" href=""></a>
+          </div>
+        </div>
+      </div>
+      <div class="d-pokemon-inner">
+        <div class="d-pokemon-container">
+          <div class="d-pokemon-chara">
+            <h2 class="d-pokemon-name"></h2>
+            <p class="d-pokemon-id"></p>
+          </div>
+          <div class="d-pokemon-box">
+            <div class="d-pokemon-imgbox">
+              <img class="d-pokemon-image" src="" alt="Pokemon" />
+            </div>
+            <div class="d-pokemon-content">
+              <div class="d-pokemon-detail">
+                <p class="d-pokemon-classification d-pokemon-item"></p>
+                <p class="d-pokemon-type d-pokemon-item"></p>
+                <p class="d-pokemon-height d-pokemon-item"></p>
+                <p class="d-pokemon-weight d-pokemon-item"></p>
+                <p class="d-pokemon-description d-pokemon-item"></p>
+                <p class="d-pokemon-version d-pokemon-item"></p>
+              </div>
+              <div class="d-pokemon-speframe">
+                <p class="d-pokemon-species"></p>
+              </div>
+            </div>
+          </div>
+          <div class="d-pokemon-stats">
+            <h3 class="d-pokemon-statitle">ステータス</h3>
+          </div>
+          <div class="d-pokemon-evolution">
+            <h3 class="d-pokemon-evotitle">進化情報</h3>
+            <div class="evolution-chain"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="footer"></footer>
+    <script>
+      // URLからクエリパラメータを取得
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const pokemonId = urlParams.get("id");
+
+      // ポケモンの詳細情報を取得する関数
+      async function getPokemonDetails() {
+        const response = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
+        );
+        const data = await response.json();
+        return data;
+      }
+
+      // タイプごとにHTML要素を生成する関数
+      function createTypeElement(type) {
+        const typeElement = document.createElement("span");
+        typeElement.textContent = type;
+        typeElement.classList.add("type", `type-${type}`);
+        return typeElement;
+      }
+
+      // ポケモンの詳細情報を表示する関数
+      function displayPokemonDetails(pokemonData) {
+        const pokemonImageElement = document.querySelector(".d-pokemon-image");
+        const pokemonNameElement = document.querySelector(".d-pokemon-name");
+        const pokemonIdElement = document.querySelector(".d-pokemon-id");
+        const pokemonHeightElement =
+          document.querySelector(".d-pokemon-height");
+        const pokemonWeightElement =
+          document.querySelector(".d-pokemon-weight");
+        const pokemonTypeElement = document.querySelector(".d-pokemon-type");
+        const pokemonVersionElement =
+          document.querySelector(".d-pokemon-version");
+        const pokemonStatsElement = document.querySelector(".d-pokemon-stats");
+        const pokemonSpeciesElement =
+          document.querySelector(".d-pokemon-species");
+        const pokemonClassificationElement = document.querySelector(
+          ".d-pokemon-classification"
+        );
+        const evolutionChainElement =
+          document.querySelector(".evolution-chain");
+        const pokemonPanElement = document.querySelector(".d-pokemon-pantext");
+        const pokemonPrevElement = document.querySelector(".d-pokemon-prev");
+        const pokemonNextElement = document.querySelector(".d-pokemon-next");
+
+        const pokemonName = pokemonData.name;
+        const pokemonId = pokemonData.id;
+        const pokemonImage = pokemonData.sprites.front_default;
+        const pokemonHeight = pokemonData.height;
+        const pokemonWeight = pokemonData.weight;
+        const pokemonTypes = pokemonData.types.map(
+          (typeData) => typeData.type.name
+        );
+        const pokemonVersion = pokemonData.game_indices
+          ? pokemonData.game_indices.map((index) => index.version.name)
+          : [];
+        const pokemonStats = pokemonData.stats.map((stat) => ({
+          name: stat.stat.name,
+          value: stat.base_stat,
+        }));
+        const pokemonSpeciesUrl = pokemonData.species.url;
+
+        //ステータスの情報
+        console.log(pokemonStats);
+
+        // ポケモンの種族情報を取得する関数
+        async function getPokemonSpecies() {
+          const response = await fetch(pokemonSpeciesUrl);
+          const data = await response.json();
+          return data;
+        }
+
+        // ポケモンの種族情報を表示する関数
+        function displayPokemonSpecies(speciesData) {
+          const speciesDescription = speciesData.flavor_text_entries.find(
+            (entry) => entry.language.name === "ja"
+          ).flavor_text;
+          pokemonSpeciesElement.textContent = speciesDescription;
+
+          // ポケモンの分類情報を表示する関数
+          const speciesClassification = speciesData.genera.find(
+            (genus) => genus.language.name === "ja"
+          ).genus;
+          pokemonClassificationElement.textContent = `分類: ${speciesClassification}`;
+        }
+
+        // タイプ要素をクリア
+        pokemonTypeElement.innerHTML = "";
+
+        // タイプごとに要素を生成し追加
+        pokemonTypes.forEach((type) => {
+          const typeElement = createTypeElement(type);
+          pokemonTypeElement.appendChild(typeElement);
+        });
+
+        // バージョン要素をクリア
+        pokemonVersionElement.innerHTML = "";
+
+        // バージョンを表示
+        pokemonVersionElement.textContent = `バージョン: ${
+          pokemonVersion.length > 0 ? pokemonVersion.join(", ") : "Unknown"
+        }`;
+
+        pokemonImageElement.src = pokemonImage;
+        pokemonIdElement.textContent = `#${pokemonId
+          .toString()
+          .padStart(4, "0")}`;
+        pokemonNameElement.textContent = pokemonName;
+        pokemonHeightElement.textContent = `高さ: ${pokemonHeight / 10}m`;
+        pokemonWeightElement.textContent = `重さ: ${pokemonWeight / 10}Kg`;
+        pokemonPanElement.textContent = ` ＞ ${pokemonName}`;
+
+        // pokemonStatsElement.innerHTML = "";
+        pokemonStats.forEach((stat) => {
+          const statElement = document.createElement("p");
+          statElement.textContent = `${stat.name}: ${stat.value}`;
+          pokemonStatsElement.appendChild(statElement);
+        });
+
+        // ポケモンの前後のIDを計算
+        let prevPokemonId = pokemonId - 1;
+        let nextPokemonId = pokemonId + 1;
+
+        // ポケモンの前後の名前を取得する関数
+        async function getPokemonName(pokemonId) {
+          const response = await fetch(
+            `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
+          );
+          const data = await response.json();
+          return data.name;
+        }
+
+        // ポケモンの前後の名前を表示する関数
+        async function displayPokemonNames() {
+          try {
+            let prevPokemonName, nextPokemonName;
+
+            // 一番最初のポケモンの一つ前のポケモンの名前を取得
+            if (pokemonId === 1) {
+              const lastPokemonId = 151; // ポケモンの最大ID（最新のポケモンのIDに合わせて調整）
+              prevPokemonName = await getPokemonName(lastPokemonId);
+              pokemonPrevElement.setAttribute(
+                "href",
+                `pokemon.html?id=${lastPokemonId}`
+              );
+              prevPokemonId = lastPokemonId;
+            } else {
+              prevPokemonName = await getPokemonName(prevPokemonId);
+
+              pokemonPrevElement.setAttribute(
+                "href",
+                `pokemon.html?id=${prevPokemonId}`
+              );
+            }
+
+            // 一番最後のポケモンの一つ後ろのポケモンの名前を取得
+            if (pokemonId === 151) {
+              nextPokemonName = await getPokemonName(1);
+              pokemonNextElement.setAttribute("href", `pokemon.html?id=${1}`);
+              nextPokemonId = 1;
+            } else {
+              nextPokemonName = await getPokemonName(nextPokemonId);
+              pokemonNextElement.setAttribute(
+                "href",
+                `pokemon.html?id=${nextPokemonId}`
+              );
+            }
+
+            pokemonPrevElement.textContent = `＜ #${prevPokemonId
+              .toString()
+              .padStart(4, "0")} ${prevPokemonName}`;
+            pokemonNextElement.textContent = `#${nextPokemonId
+              .toString()
+              .padStart(4, "0")} ${nextPokemonName} ＞`;
+          } catch (error) {
+            console.log("Error:", error);
+          }
+        }
+
+        // ポケモンの前後の名前を表示
+        displayPokemonNames();
+
+        // 進化情報を表示する関数
+        function displayEvolutionChain(evolutionData) {
+          const evolutionChain = evolutionData.chain;
+
+          let currentEvolution = evolutionChain;
+          const evolutionList = [];
+
+          while (currentEvolution !== null) {
+            const speciesName = currentEvolution.species.name;
+            const evolvesTo = currentEvolution.evolves_to;
+
+            const evolutionElement = document.createElement("div");
+            evolutionElement.classList.add("evolution");
+
+            const evolutionName = document.createElement("p");
+            evolutionName.textContent = speciesName;
+
+            const evolutionImage = document.createElement("img");
+            evolutionImage.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
+              currentEvolution.species.url.split("/").slice(-2)[0]
+            }.png`;
+            evolutionImage.alt = speciesName;
+
+            evolutionElement.appendChild(evolutionName);
+            evolutionElement.appendChild(evolutionImage);
+
+            evolutionList.push(evolutionElement);
+
+            if (evolvesTo.length > 1) {
+              const evolutionBranches = document.createElement("div");
+              evolutionBranches.classList.add("evolution-branches");
+
+              evolvesTo.forEach((evolution) => {
+                const branchElement = document.createElement("div");
+                branchElement.classList.add("evolution-branch");
+
+                const branchEvolutionName = document.createElement("p");
+                branchEvolutionName.textContent = evolution.species.name;
+
+                const branchEvolutionImage = document.createElement("img");
+                branchEvolutionImage.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
+                  evolution.species.url.split("/").slice(-2)[0]
+                }.png`;
+                branchEvolutionImage.alt = evolution.species.name;
+
+                function createTypeElement(type) {
+                  const typeElement = document.createElement("span");
+                  typeElement.textContent = type;
+                  typeElement.classList.add(
+                    "type",
+                    `type-${type.toLowerCase()}`
+                  ); // 小文字に変換したタイプ名をクラスに追加
+                  return typeElement;
+                }
+
+                branchElement.appendChild(branchEvolutionName);
+                branchElement.appendChild(branchEvolutionImage);
+
+                evolutionBranches.appendChild(branchElement);
+              });
+
+              evolutionList.push(evolutionBranches);
+            } else if (evolvesTo.length === 1) {
+              currentEvolution = evolvesTo[0];
+            } else {
+              currentEvolution = null;
+            }
+          }
+
+          evolutionList.forEach((element) => {
+            evolutionChainElement.appendChild(element);
+          });
+
+          // タイプ要素を追加
+          const evolutionTypeElements =
+            evolutionChainElement.querySelectorAll(".type");
+          evolutionTypeElements.forEach((typeElement) => {
+            const type = typeElement.textContent;
+            const updatedTypeElement = createTypeElement(type);
+            typeElement.parentNode.replaceChild(
+              updatedTypeElement,
+              typeElement
+            );
+          });
+        }
+
+        // ポケモンの進化情報を取得して表示
+        async function getPokemonEvolution() {
+          const response = await fetch(pokemonSpeciesUrl);
+          const speciesData = await response.json();
+          const evolutionChainUrl = speciesData.evolution_chain.url;
+          const evolutionResponse = await fetch(evolutionChainUrl);
+          const evolutionData = await evolutionResponse.json();
+          return evolutionData;
+        }
+
+        // ポケモンの進化情報を表示する
+        getPokemonEvolution().then(displayEvolutionChain);
+
+        // ポケモンの種族情報を取得して表示
+        getPokemonSpecies().then(displayPokemonSpecies);
+      }
+
+      // ポケモンの詳細情報を取得し表示する
+      async function showPokemonDetails() {
+        try {
+          const pokemonData = await getPokemonDetails();
+          displayPokemonDetails(pokemonData);
+        } catch (error) {
+          console.log("Error:", error);
+        }
+      }
+
+      // ページがロードされた時にポケモンの詳細情報を表示する
+      showPokemonDetails();
+    </script>
+  </body>
+</html>
