@@ -221,3 +221,26 @@
   font-size: 24px;
   margin-bottom: 33px;
 }
+
+.swiper-slide {
+  width: 30%;
+}
+
+.swiper-slide .pokemon-imgframe {
+  width: 70%;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: #000; /* ボタンの色を設定 */
+  font-size: 24px; /* ボタンのサイズを設定 */
+}
+
+/* #pokedex-container .pokemon {
+  opacity: 0;
+} */
+
+#ex_chart {
+  max-width: 640px;
+  max-height: 480px;
+}
