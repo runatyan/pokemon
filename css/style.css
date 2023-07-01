@@ -228,6 +228,8 @@
 
 .swiper-slide {
   width: 30%;
+  border: 1px solid #000;
+  padding: 30px;
 }
 
 .swiper-slide .pokemon-imgframe {
@@ -238,13 +240,14 @@
 .swiper-button-next {
   color: #000; /* ボタンの色を設定 */
   font-size: 24px; /* ボタンのサイズを設定 */
+  background-color: #000;
 }
-
-/* #pokedex-container .pokemon {
-  opacity: 0;
-} */
 
 #ex_chart {
   max-width: 640px;
   max-height: 480px;
+}
+
+.more.none {
+  display: none;
 }
