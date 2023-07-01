@@ -21,6 +21,10 @@
   background-color: #bbb;
 }
 
+.content {
+  margin-bottom: 30px;
+}
+
 .d-pokemon-inner {
   max-width: 1920px;
   width: 59%;
@@ -226,26 +230,14 @@
   margin-bottom: 30px;
 }
 
-.swiper-slide {
-  width: 30%;
-  border: 1px solid #000;
-  padding: 30px;
-}
-
-.swiper-slide .pokemon-imgframe {
-  width: 70%;
-}
-
-.swiper-button-prev,
-.swiper-button-next {
-  color: #000; /* ボタンの色を設定 */
-  font-size: 24px; /* ボタンのサイズを設定 */
-  background-color: #000;
-}
-
 #ex_chart {
   max-width: 640px;
   max-height: 480px;
+}
+
+.more {
+  display: block;
+  margin: 0 auto;
 }
 
 .more.none {
