@@ -105,7 +105,6 @@
 
       // ポケモンの詳細情報を表示する
       function displayPokemonDetails(pokemonData) {
-        console.log(pokemonData);
         //HTML要素を取得するところ
         const pokemonImageElement = document.querySelector(".d-pokemon-image");
         const pokemonNameElement = document.querySelector(".d-pokemon-name");
@@ -161,13 +160,6 @@
 
         // ポケモンの種族情報を表示する関数
         function displayPokemonSpecies(speciesData) {
-          // //ポケモンの種族情報の配列から指定された条件を満たす最初の要素を取得
-          // const speciesDescription = speciesData.flavor_text_entries.find(
-          //   //日本語を探す
-          //   (entry) => entry.language.name === "ja"
-          // ).flavor_text;
-          // pokemonSpeciesElement.textContent = speciesDescription;
-
           // ポケモンの種族情報の配列から、日本語のテキストを含むすべての要素をフィルタリングします。
           const japaneseSpecies = speciesData.flavor_text_entries.filter(
             (entry) => entry.language.name === "ja"
@@ -381,6 +373,7 @@
 
             evolutionList.push(evolutionElement);
 
+            //進化先に分岐がある時に使用する
             if (evolvesTo.length > 1) {
               const evolutionBranches = document.createElement("div");
               evolutionBranches.classList.add("evolution-branches");
